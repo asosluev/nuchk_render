@@ -1,22 +1,21 @@
 # config.py
-import os
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
+load_dotenv()  # прочитати .env, якщо є
 
-MENU_FILE = DATA_DIR / "menu.json"
-INFO_FILE = DATA_DIR / "info.json"
+BASE_DIR = Path(__file__).parent
+TOKEN = os.getenv('TG_BOT_TOKEN', 'PUT_YOUR_TOKEN_HERE')
 
-# Telegram / deployment
-BOT_TOKEN = os.getenv("BOT_TOKEN", "")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "")  # наприклад: https://your-app.onrender.com
-PORT = int(os.getenv("PORT", "8443"))
+# ADMINS: перелік рядків, може бути id (як рядок) або @username
+ADMINS = [x.strip() for x in os.getenv('TG_ADMINS', '').split(',') if x.strip()]
 
-# меню callback prefix
-CB_PREFIX = "menu:"
+DATA_DIR = BASE_DIR / 'data'
+MENU_FILE = DATA_DIR / 'menu.json'
+INFO_FILE = DATA_DIR / 'info.json'
 
-# адміністратори (можна вказати через ENV ADMIN_IDS="123,456")
-ADMIN_IDS = [int(x) for x in os.getenv("ADMIN_IDS", "123456789").split(",") if x.strip()]
+# Callback prefix — для розпізнавання наших callback-ів
+CB_PREFIX = 'menu:'
 
-WELCOME_TEXT = "Ласкаво просимо! Оберіть пункт меню."
+WELCOME_TEXT = 'Ласкаво просимо до бота профорієнтації університету! Оберіть пункт меню.'
