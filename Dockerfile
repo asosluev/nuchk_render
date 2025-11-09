@@ -9,7 +9,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Виставляємо порт (Render використовує змінну PORT)
+# Виставляємо порт (Render передає свій через ENV PORT)
 ENV PORT=8443
 
 CMD ["python", "bot.py"]
