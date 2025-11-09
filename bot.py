@@ -21,33 +21,24 @@ async def help_command(update: Update, context):
         "/reload — (адмін) перечитати JSON"
     )
 
-from aiohttp import web
-from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler
-
-# ... ваші хендлери ...
-
 async def main():
     application = ApplicationBuilder().token(BOT_TOKEN).build()
 
     # базові команди
     application.add_handler(CommandHandler("start", start_command))
     application.add_handler(CommandHandler("help", help_command))
+
+    # підключаємо меню і адмін-хендлери
     register_menu_handlers(application)
     register_admin_handlers(application)
 
-    # aiohttp server
+    # Налаштування aiohttp серверу для webhook
     async def health(request):
         return web.Response(text="OK")
 
-    async def telegram_webhook(request):
-        data = await request.json()
-        update = Update.de_json(data, application.bot)
-        await application.update_queue.put(update)
-        return web.Response(text="OK")
-
     app = web.Application()
-    app.router.add_post("/webhook", telegram_webhook)
+    # маршрут, який обробляє webhook POST від Telegram
+    app.router.add_post("/webhook", application.webhook_handler)
     app.router.add_get("/", health)
 
     runner = web.AppRunner(app)
@@ -55,13 +46,13 @@ async def main():
     site = web.TCPSite(runner, "0.0.0.0", PORT)
     await site.start()
 
-    # встановлюємо webhook
+    # встановлюємо webhook у Telegram
     await application.bot.set_webhook(url=f"{WEBHOOK_URL}/webhook")
     print(f"Webhook set to: {WEBHOOK_URL}/webhook")
     print(f"Server started on 0.0.0.0:{PORT}")
 
+    # додати graceful shutdown при потребі
     await asyncio.Event().wait()
-
 
 if __name__ == "__main__":
     asyncio.run(main())
