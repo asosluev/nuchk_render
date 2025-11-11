@@ -147,13 +147,20 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if children:
         # if info for this node is a string, show it; if dict with text, use it
         info_text = None
+        image = None
         if node_key:
             node_info = menu_manager.info.get(node_key)
             if isinstance(node_info, str):
                 info_text = node_info
             elif isinstance(node_info, dict):
                 info_text = node_info.get("text")
+                image = node_info.get("image")
         label = info_text or node.get("text") or node.get("title") or "Оберіть пункт:"
+         # ⬇️ якщо є image — показати її
+        if image:
+            msg_photo = await query.message.reply_photo(photo=image)
+            context.user_data["image_message_id"] = msg_photo.message_id
+            context.user_data["image_chat_id"] = msg_photo.chat_id
         await query.message.edit_text(label, reply_markup=markup)
         return
 
