@@ -7,11 +7,15 @@
       "children": [
         {
           "key": "site",
-          "text": "Сайт «Чернігівський колегіум»"
+          "text": "🌐 Сайт «Чернігівський колегіум»"
         },
         {
           "key": "promo",
-          "text": "ПРОМО найкращого університету"
+          "text": "🎬 ПРОМО найкращого університету"
+        },
+        {
+          "key": "nychk_inst",
+          "text": "📱 Наш Instagram"
         }
       ]
     },
@@ -62,10 +66,12 @@
               "key": "history_instagram",
               "text": "📱 Наш Instagram"
             },
+
             {
-              "key": "history_tiktok",
-              "text": "📲 Ми в Тik-Tok"
+              "key": "sport_facebook",
+              "text": "📱 Наш Facebook"
             },
+       
             {
               "key": "history_site",
               "text": "🌏 Ми на сайті НУЧК"
@@ -93,10 +99,7 @@
               "key": "psychology_instagram",
               "text": "📱 Наш Instagram"
             },
-            {
-              "key": "psychology_tiktok",
-              "text": "📲 Ми в Тik-Tok"
-            },
+          
             {
               "key": "psychology_site",
               "text": "🌏 Ми на сайті НУЧК"
@@ -108,6 +111,99 @@
             },
              {
               "key": "psychology_adress",
+              "text": "📍 Адреса"
+            }
+          ]
+        },
+        {
+          "key": "preschool_education_faculty",
+          "text": "📗 Ф-т дошкільної, початкової освіти і мистецтв",
+          "children": [
+            {
+              "key": "preschool_education_telegram",
+              "text": "👌 Канал в Telegram"
+            },
+            {
+              "key": "preschool_education_instagram",
+              "text": "📱 Наш Instagram"
+            },
+            {
+              "key": "preschool_education_facebook",
+              "text": "📱 Наш Facebook"
+            },
+            {
+              "key": "preschool_education_site",
+              "text": "🌏 Ми на сайті НУЧК"
+            },
+            
+            {
+              "key": "preschool_education_contacts",
+              "text": "📞 Контакти"
+            },
+             {
+              "key": "preschool_education_adress",
+              "text": "📍 Адреса"
+            }
+          ]
+        },
+        {
+          "key": "teh_faculty",
+          "text": "📐 Навчально-науковий інститут професійної освіти та технологій",
+          "children": [
+            {
+              "key": "teh_telegram",
+              "text": "👌 Канал в Telegram"
+            },
+            {
+              "key": "teh_instagram",
+              "text": "📱 Наш Instagram"
+            },
+            {
+              "key": "teh_facebook",
+              "text": "📱 Наш Facebook"
+            },
+            {
+              "key": "teh_site",
+              "text": "🌏 Ми на сайті НУЧК"
+            },
+            
+            {
+              "key": "teh_contacts",
+              "text": "📞 Контакти"
+            },
+             {
+              "key": "teh_adress",
+              "text": "📍 Адреса"
+            }
+          ]
+        },
+        {
+          "key": "maths_faculty",
+          "text": "📊 Природничо-математичний ф-т",
+          "children": [
+            {
+              "key": "maths_telegram",
+              "text": "👌 Канал в Telegram"
+            },
+            {
+              "key": "maths_instagram",
+              "text": "📱 Наш Instagram"
+            },
+            {
+              "key": "maths_facebook",
+              "text": "📱 Наш Facebook"
+            },
+            {
+              "key": "maths_site",
+              "text": "🌏 Ми на сайті НУЧК"
+            },
+            
+            {
+              "key": "maths_contacts",
+              "text": "📞 Контакти"
+            },
+             {
+              "key": "maths_adress",
               "text": "📍 Адреса"
             }
           ]
