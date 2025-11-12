@@ -44,7 +44,7 @@ class MenuManager:
             items = node.get("children", []) or node.get("items", [])
         return node
 
-       def build_markup(self, node: dict, path: list):
+    def build_markup(self, node: dict, path: list):
         kb = []
         child_list = node.get("items") or node.get("children") or []
 
