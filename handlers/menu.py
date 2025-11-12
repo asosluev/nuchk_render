@@ -44,18 +44,37 @@ class MenuManager:
             items = node.get("children", []) or node.get("items", [])
         return node
 
-    def build_markup(self, node: dict, path: list):
+       def build_markup(self, node: dict, path: list):
         kb = []
         child_list = node.get("items") or node.get("children") or []
+
         for it in child_list:
             key = it.get("key")
             text = it.get("text", key)
-            cb = CB_PREFIX + "/".join(path + [key]) if (path or key) else CB_PREFIX
+
+            # 🔹 Якщо у info.json для цього ключа є URL — створюємо кнопку з посиланням
+            url_value = self.info.get(key)
+            if isinstance(url_value, str) and url_value.startswith(("http://", "https://")):
+                kb.append([InlineKeyboardButton(text, url=url_value)])
+                continue
+
+            # 🔹 Якщо є підменю — створюємо callback для навігації
+            if "children" in it or "items" in it:
+                cb = CB_PREFIX + "/".join(path + [key])
+                kb.append([InlineKeyboardButton(text, callback_data=cb)])
+                continue
+
+            # 🔹 Якщо звичайний пункт (листовий)
+            cb = CB_PREFIX + "/".join(path + [key])
             kb.append([InlineKeyboardButton(text, callback_data=cb)])
+
+        # 🔹 Кнопка «Назад»
         if path:
             back_cb = CB_PREFIX + "/".join(path[:-1]) if len(path) > 1 else CB_PREFIX
             kb.append([InlineKeyboardButton("⬅️ Назад", callback_data=back_cb)])
+
         return InlineKeyboardMarkup(kb)
+
 
 menu_manager = MenuManager()
 
