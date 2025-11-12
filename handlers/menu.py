@@ -123,7 +123,33 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # If there was a previously shown image, delete it now (we will show new image if needed)
     await _delete_prev_image(context)
+    # 🔹 Якщо обрано пункт "contacts", показуємо всі контакти
+    if node_key == "contacts":
+        contacts = menu_manager.info.get("contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        await query.message.edit_text(txt, reply_markup=markup)
+        return
+        # 🔹 Якщо обрано пункт "contacts", показуємо всі контакти
+    if node_key == "sport_contacts":
+        contacts = menu_manager.info.get("sport_contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        if contacts.get("schedule"):
+            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
 
+        await query.message.edit_text(txt, reply_markup=markup)
+        return
     # Special: consult -> show contact inline
     if node_key == "consult":
         consult = menu_manager.info.get("contacts", {}).get("consultant_username")
