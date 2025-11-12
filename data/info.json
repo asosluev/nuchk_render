@@ -2,6 +2,7 @@
     "about": "Національний університет «Чернігівський колегіум» імені Т.Г.Шевченка — один з найвідоміших серед вищих навчальних закладів освіти в Україні.Його родовід сягає сивої давнини — Чернігівського колегіуму, заснованого у 1700 році за взірцем Києво-Могилянської академії. Колегіум відіграв важливу роль у становленні вищої педагогічної освіти на північному Лівобережжі України.\n \n P.s. Головна шарага Чернігова",
     "site": "http://chnpu.edu.ua/",
     "promo": "https://www.youtube.com/watch?v=P_DI9xBlz4Q",
+    "nychk_inst": "https://www.instagram.com/stud.nu4k?igshid=YmMyMTA2M2Y%3D",
     "specs": "🎓 Факультети та інститути \n Оберіть потрібний та переглянь інформацію...",
     "sport_faculty": {
         "text": "⚽Факультет фізичного виховання",
@@ -17,24 +18,107 @@
         "consultant_username": "@unibot_manager",
         "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
     },
-    "sport_adress": "Факультет: \n Адреса: м. Чернігів, вул. Гетьмана Полуботка, 53 \n\n Спортивний корпус № 2:\n Адреса: м. Чернігів, вул. Шевченка, 48-б" ,
-    "history_faculty":{
+    "sport_adress": "Факультет: \n Адреса: м. Чернігів, вул. Гетьмана Полуботка, 53 \n\n Спортивний корпус № 2:\n Адреса: м. Чернігів, вул. Шевченка, 48-б",
+    "history_faculty": {
         "text": "ННІ історії та соціогуманітарних дисциплін імені О.М Лазаревського",
         "image": "http://chnpu.edu.ua/images/FFV_2020/map_of_cite_4.jpg"
     },
-    "history_telegram":"",
-    "history_instagram":"",
-    "history_tiktok":"",
-    "history_site":"",
-    "history_contacts":{
-        "phone": "+380-98-643-59-32",
-        "email": "dekanat.phed.nuchk@gmail.com",
-        "consultant_username": "@unibot_manager",
+    "history_telegram": "https://t.me/nni_history",
+    "history_instagram": "https://www.instagram.com/inst_hist_lazarevskogo?igshid=YmMyMTA2M2Y%3D",
+    "history_facebook": "https://www.facebook.com/groups/1268223556529140/?ref=share_group_link",
+    "history_site": "https://inst-hist.chnpu.edu.ua/",
+    "history_contacts": {
+        "phone": "",
+        "email": "",
+        "consultant_username": "",
         "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
     },
-    "history_adress":"",
+    "history_adress": "",
+
+
     
+    "psychology_faculty": {
+        "text": "💫 ННІ психології та соціальної роботи",
+        "image": "http://chnpu.edu.ua/images/FFV_2020/map_of_cite_4.jpg"
+    },
+    "psychology_telegram": "https://t.me/+c_DSyLQpNrJhOWUy",
+    "psychology_instagram": "https://www.instagram.com/nnipsy_nu4k",
+    "psychology_site": "http://chnpu.edu.ua/faculties/psychopedagogical-faculty",
+    "psychology_contacts": {
+        "phone": "(0462)-941-067",
+        "email": "",
+        "consultant_username": "r",
+        "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
+    },
+    "psychology_adress": "",
+
+
+    "preschool_education_faculty": {
+        "text": "📗 Ф-т дошкільної, початкової освіти і мистецтв",
+        "image": "http://chnpu.edu.ua/images/FFV_2020/map_of_cite_4.jpg"
+    },
+    "preschool_education_telegram": "https://t.me/fdpoim",
+    "preschool_education_instagram": "https://www.instagram.com/fdpoim_nuchk/",
+    "preschool_education_facebook": "https://www.facebook.com/groups/177609477296099",
+
+    "preschool_education_site": "http://chnpu.edu.ua/faculties/primaryeducation-faculty",
+    "preschool_education_contacts": {
+        "phone": "",
+        "email": "",
+        "consultant_username": "r",
+        "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
+    },
+    "preschool_education_adress": "",
+
+
     
+    "teh_faculty": {
+        "text": "📐 Навчально-науковий інститут професійної освіти та технологій",
+        "image": "http://chnpu.edu.ua/images/chnpu/%D0%A2%D0%A4.jpg"
+    },
+    "teh_telegram": "https://t.me/+RWkySOGA6fjLvrX7",
+    "teh_instagram": "https://www.instagram.com/tf_nuchk?igshid=NmQ2ZmYxZjA%3D",
+    "teh_facebook": "https://www.facebook.com/groups/440139689927181",
+
+    "teh_site": "http://chnpu.edu.ua/faculties/technological-faculty",
+    "teh_contacts": {
+        "phone": "(063)-523-39-54",
+        "email": "chnpu@chnpu.edu.ua",
+        
+        "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
+    },
+    "teh_adress": "вул. Гетьмана Полуботка, 53; м Чернігів, 14013",
+
+    "maths_faculty": {
+        "text": "📊 Природничо-математичний ф-т",
+        "image": "http://chnpu.edu.ua/images/chnpu/PriMat.jpg"
+    },
+    "maths_telegram": "https://t.me/pm_faculty",
+    "maths_instagram": "https://www.instagram.com/p.m_faculty?igshid=YmMyMTA2M2Y%3D",
+    "maths_facebook": "https://www.facebook.com/p.m.faculty",
+
+    "maths_site": "http://chnpu.edu.ua/faculties/physandmath-faculty",
+    "maths_contacts": {
+        "phone": "(073) 104-82-73.",
+        "email": "chnpu@chnpu.edu.ua",
+        "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
+    },
+    "maths_adress": "вул. Гетьмана Полуботка, 53; м Чернігів, 14013",
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
     "cs": "Кафедра комп'ютерних наук: навчання за напрямом ... Контакти: +380441234567",
     "cyber": "Кафедра кібербезпеки: опис програми, ключові предмети, контакти.",
     "inst_sport": {
