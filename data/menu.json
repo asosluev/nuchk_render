@@ -43,18 +43,40 @@
               "key": "sport_site",
               "text": "🌏 Ми на сайті НУЧК"
             },
-            
+            {
+              "key": "sport_specialties",
+              "text": "🎯 Спеціальності",
+              "children": [
+                {
+                  "key": "sport_spec_1",
+                  "text": "Фізичне виховання"
+                  
+                },
+                {
+                  "key": "sport_spec_2",
+                  "text": "Фізична терапія та ерготерапія"
+                },
+                {
+                  "key": "sport_spec_3",
+                  "text": "Спорт"
+                },
+                {
+                  "key": "sport_spec_4",
+                  "text": "Кінезіологія"
+                }
+              ]
+            },
             {
               "key": "sport_contacts",
               "text": "📞 Контакти"
             },
-             {
+            {
               "key": "sport_adress",
               "text": "📍 Адреса"
             }
           ]
         },
-          {
+        {
           "key": "history_faculty",
           "text": "🏺ННІ історії та соціогуманітарних дисциплін імені О.М Лазаревського",
           "children": [
@@ -66,28 +88,25 @@
               "key": "history_instagram",
               "text": "📱 Наш Instagram"
             },
-
             {
               "key": "sport_facebook",
               "text": "📱 Наш Facebook"
             },
-       
             {
               "key": "history_site",
               "text": "🌏 Ми на сайті НУЧК"
             },
-            
             {
               "key": "history_contacts",
               "text": "📞 Контакти"
             },
-             {
+            {
               "key": "history_adress",
               "text": "📍 Адреса"
             }
           ]
         },
-           {
+        {
           "key": "psychology_faculty",
           "text": "💫 ННІ психології та соціальної роботи",
           "children": [
@@ -99,56 +118,53 @@
               "key": "psychology_instagram",
               "text": "📱 Наш Instagram"
             },
-          
             {
               "key": "psychology_site",
               "text": "🌏 Ми на сайті НУЧК"
             },
-            
             {
               "key": "psychology_contacts",
               "text": "📞 Контакти"
             },
-             {
+            {
               "key": "psychology_adress",
               "text": "📍 Адреса"
             }
           ]
         },
         {
-          "key": "preschool_education_faculty",
+          "key": "preschool_faculty",
           "text": "📗 Ф-т дошкільної, початкової освіти і мистецтв",
           "children": [
             {
-              "key": "preschool_education_telegram",
+              "key": "preschool_telegram",
               "text": "👌 Канал в Telegram"
             },
             {
-              "key": "preschool_education_instagram",
+              "key": "preschool_instagram",
               "text": "📱 Наш Instagram"
             },
             {
-              "key": "preschool_education_facebook",
+              "key": "preschool_facebook",
               "text": "📱 Наш Facebook"
             },
             {
-              "key": "preschool_education_site",
+              "key": "preschool_site",
               "text": "🌏 Ми на сайті НУЧК"
             },
-            
             {
-              "key": "preschool_education_contacts",
+              "key": "preschool_contacts",
               "text": "📞 Контакти"
             },
-             {
-              "key": "preschool_education_adress",
+            {
+              "key": "preschool_adress",
               "text": "📍 Адреса"
             }
           ]
         },
         {
           "key": "teh_faculty",
-          "text": "📐 Навчально-науковий інститут професійної освіти та технологій",
+          "text": "📐 ННІ професійної освіти та технологій",
           "children": [
             {
               "key": "teh_telegram",
@@ -166,12 +182,11 @@
               "key": "teh_site",
               "text": "🌏 Ми на сайті НУЧК"
             },
-            
             {
               "key": "teh_contacts",
               "text": "📞 Контакти"
             },
-             {
+            {
               "key": "teh_adress",
               "text": "📍 Адреса"
             }
@@ -197,13 +212,50 @@
               "key": "maths_site",
               "text": "🌏 Ми на сайті НУЧК"
             },
-            
             {
               "key": "maths_contacts",
               "text": "📞 Контакти"
             },
-             {
+            {
               "key": "maths_adress",
+              "text": "📍 Адреса"
+            }
+          ]
+        },
+        {
+          "key": "philology_faculty",
+          "text": "📚 Філологічний факультет",
+          "children": [
+            {
+              "key": "philology_telegram",
+              "text": "👌 Канал в Telegram"
+            },
+            {
+              "key": "philology_instagram",
+              "text": "📱 Наш Instagram"
+            },
+            {
+              "key": "philology_facebook",
+              "text": "📱 Наш Facebook"
+            },
+            {
+              "key": "philology_tiktok",
+              "text": "💫 Наш Tik-Tok"
+            },
+            {
+              "key": "philology_youtube",
+              "text": "🎬 Наш YouTube"
+            },
+            {
+              "key": "philology_site",
+              "text": "🌏 Ми на сайті НУЧК"
+            },
+            {
+              "key": "philology_contacts",
+              "text": "📞 Контакти"
+            },
+            {
+              "key": "philology_adress",
               "text": "📍 Адреса"
             }
           ]
@@ -212,11 +264,21 @@
     },
     {
       "key": "apply",
-      "text": "📝 Як подати документи"
-    },
-    {
-      "key": "docs",
-      "text": "📄 Перелік документів"
+      "text": "📝 Як подати документи",
+      "children": [
+        {
+          "key": "apply_site",
+          "text": "Вступ"
+        },
+        {
+          "key": "apply_info",
+          "text": "Додаткова інформація"
+        },
+        {
+          "key": "docs",
+          "text": "📄 Перелік документів"
+        }
+      ]
     },
     {
       "key": "schedule",
@@ -227,10 +289,6 @@
       "text": "💰 Реквізити"
     },
     {
-      "key": "contacts",
-      "text": "📞 Контакти"
-    },
-    {
       "key": "links",
       "text": "🔗 Корисні посилання"
     },
@@ -239,12 +297,42 @@
       "text": "💬 Зв’язатися з консультантом"
     },
     {
-      "key": "faq",
-      "text": "❓ FAQ"
+      "key": "career_test",
+      "text": "🎯 Профорієнтаційний тест"
     },
     {
       "key": "news",
       "text": "📰 Новини"
+    },
+    {
+      "key": "contacts",
+      "text": "📞 Контакти"
+    },
+    {
+      "key": "faq",
+      "text": "❓ FAQ"
+    },
+    {
+      "key": "sport_specialties",
+      "text": "🎯 Спеціальності",
+      "children": [
+        {
+          "key": "sport_spec_1",
+          "text": "Фізичне виховання"
+        },
+        {
+          "key": "sport_spec_2",
+          "text": "Фізична терапія та ерготерапія"
+        },
+        {
+          "key": "sport_spec_3",
+          "text": "Спорт"
+        },
+        {
+          "key": "sport_spec_4",
+          "text": "Кінезіологія"
+        }
+      ]
     }
   ]
 }
