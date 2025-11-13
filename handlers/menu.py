@@ -10,10 +10,12 @@ Menu handler (webhook-ready). Behavior mirrors polling-version logic:
 
 import json
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
-from telegram.ext import ContextTypes, CallbackQueryHandler
+from telegram.ext import ContextTypes, CallbackQueryHandler, CommandHandler
 from config import MENU_FILE, INFO_FILE, CB_PREFIX, WELCOME_TEXT
 
-# Load manager that can be reloaded by admin
+# ===============================================================
+# Менеджер меню
+# ===============================================================
 class MenuManager:
     def __init__(self):
         self.menu = {}
@@ -21,7 +23,6 @@ class MenuManager:
         self.load()
 
     def load(self):
-        # load menu.json and info.json
         with open(MENU_FILE, "r", encoding="utf-8") as f:
             self.menu = json.load(f)
         with open(INFO_FILE, "r", encoding="utf-8") as f:
@@ -44,41 +45,165 @@ class MenuManager:
             items = node.get("children", []) or node.get("items", [])
         return node
 
-    def build_markup(self, node: dict, path: list):
+    def build_markup(self, node: dict, path: list, row_size: int = 3):  
+        #==================================
+        #Головне меню: кастомна розкладка по рядках
+        #    - Підменю: row_size кнопок в рядок
+        #   - Кнопки "Назад" і "Головне меню" завжди в останньому рядку
+        #================================= 
         kb = []
         child_list = node.get("items") or node.get("children") or []
-
+        is_main_menu = not path 
+        buttons = []
         for it in child_list:
             key = it.get("key")
             text = it.get("text", key)
-
-            # 🔹 Якщо у info.json для цього ключа є URL — створюємо кнопку з посиланням
             url_value = self.info.get(key)
             if isinstance(url_value, str) and url_value.startswith(("http://", "https://")):
-                kb.append([InlineKeyboardButton(text, url=url_value)])
+                buttons.append(InlineKeyboardButton(text, url=url_value))
                 continue
-
-            # 🔹 Якщо є підменю — створюємо callback для навігації
-            if "children" in it or "items" in it:
-                cb = CB_PREFIX + "/".join(path + [key])
-                kb.append([InlineKeyboardButton(text, callback_data=cb)])
-                continue
-
-            # 🔹 Якщо звичайний пункт (листовий)
             cb = CB_PREFIX + "/".join(path + [key])
-            kb.append([InlineKeyboardButton(text, callback_data=cb)])
+            buttons.append(InlineKeyboardButton(text, callback_data=cb))
 
-        # 🔹 Кнопка «Назад»
+   # --- Розкладаємо кнопки ---
+        if is_main_menu:
+        # Кількість кнопок на рядках для головного меню
+            main_menu_layout = [1, 2, 3, 3, 3, 1, 1, 2, 2, 1]  # приклад для 10 рядків
+            i = 0
+            for row_count in main_menu_layout:
+                if i >= len(buttons):
+                    break
+                kb.append(buttons[i:i+row_count])
+                i += row_count
+        # Якщо залишились кнопки, розбиваємо по row_size
+            while i < len(buttons):
+                kb.append(buttons[i:i+row_size])
+                i += row_size
+        else:
+        # Підменю – стандартно по row_size
+            for i in range(0, len(buttons), row_size):
+                kb.append(buttons[i:i+row_size])
+
+    # Кнопки "Назад" і "Головне меню" в окремий рядок, завжди поруч
         if path:
             back_cb = CB_PREFIX + "/".join(path[:-1]) if len(path) > 1 else CB_PREFIX
-            kb.append([InlineKeyboardButton("⬅️ Назад", callback_data=back_cb)])
+            home_cb = CB_PREFIX
+            kb.append([
+                InlineKeyboardButton("⬅️ Назад", callback_data=back_cb),
+                InlineKeyboardButton("🏠 Головне меню", callback_data=home_cb)
+        ])
 
         return InlineKeyboardMarkup(kb)
+    def find_node_by_key(self, key: str, node=None):
+        if node is None:
+            node = self.menu
+        if node.get("key") == key:
+            return node
+        for child in node.get("items", []) + node.get("children", []):
+            result = self.find_node_by_key(key, child)
+            if result:
+                return result
+        return None
 
 
 menu_manager = MenuManager()
 
-# Start / show root menu
+# ===============================================================
+# Профорієнтаційний тест
+# ===============================================================
+career_questions = [
+    {
+        "q": "1️⃣ Що вам більше до душі?",
+        "options": {
+            "Фізична активність, спорт": "sport_faculty",
+            "Історія, культура, суспільство": "history_faculty",
+            "Психологія, допомога людям": "psychology_faculty",
+            "Мистецтво, малювання, діти": "preschool_education_faculty"
+        }
+    },
+    {
+        "q": "2️⃣ Що вам подобається в навчанні?",
+        "options": {
+            "Розуміти, як щось працює": "teh_faculty",
+            "Писати тексти, аналізувати літературу": "philology_faculty",
+            "Працювати руками, створювати речі": "teh_faculty",
+            "Спілкуватися з людьми": "psychology_faculty"
+        }
+    },
+    {
+        "q": "3️⃣ Який урок у школі вам найцікавіший?",
+        "options": {
+            "Фізкультура": "sport_faculty",
+            "Історія": "history_faculty",
+            "Психологія / Громадянська освіта": "psychology_faculty",
+            "Мова і література": "philology_faculty",
+            "Трудове навчання": "teh_faculty",
+            "Малювання / Музика": "preschool_education_faculty"
+        }
+    },
+    {
+        "q": "4️⃣ Що для вас найважливіше в роботі?",
+        "options": {
+            "Рух і динаміка": "sport_faculty",
+            "Креатив і самовираження": "preschool_education_faculty",
+            "Спілкування й допомога людям": "psychology_faculty",
+            "Логіка, технології": "teh_faculty"
+        }
+    },
+    {
+        "q": "5️⃣ Як ви любите проводити вільний час?",
+        "options": {
+            "Активно, на свіжому повітрі": "sport_faculty",
+            "Читаючи або пишучи": "philology_faculty",
+            "Малюючи, співаючи, створюючи щось": "preschool_education_faculty",
+            "Розмовляючи з друзями": "psychology_faculty"
+        }
+    }
+]
+
+async def start_career_test(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["career_progress"] = 0
+    context.user_data["career_scores"] = {}
+    await send_next_question(update, context)
+
+async def send_next_question(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    i = context.user_data.get("career_progress", 0)
+    if i >= len(career_questions):
+        scores = context.user_data.get("career_scores", {})
+        if not scores:
+            await update.effective_message.reply_text("Ви не відповіли на жодне питання 😅")
+            return
+        best_faculty = max(scores, key=scores.get)
+        kb = [[InlineKeyboardButton("➡️ Перейти до факультету", callback_data=f"{CB_PREFIX}/specs/{best_faculty}")]]
+        faculty_name = menu_manager.info.get(best_faculty, {}).get("text", best_faculty)
+        await update.effective_message.reply_text(
+            f"✅ Ви завершили тест!\n\nВам найбільше підходить: *{faculty_name}*",
+            reply_markup=InlineKeyboardMarkup(kb),
+            parse_mode="Markdown"
+        )
+        return
+
+    qdata = career_questions[i]
+    buttons = [
+        [InlineKeyboardButton(text=opt, callback_data=f"career_ans:{fac}")]
+        for opt, fac in qdata["options"].items()
+    ]
+    markup = InlineKeyboardMarkup(buttons)
+    msg = update.message or update.callback_query.message
+    await msg.reply_text(qdata["q"], reply_markup=markup)
+
+async def handle_career_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+    data = query.data.split("career_ans:")[-1]
+    scores = context.user_data.setdefault("career_scores", {})
+    scores[data] = scores.get(data, 0) + 1
+    context.user_data["career_progress"] = context.user_data.get("career_progress", 0) + 1
+    await send_next_question(update, context)
+
+# ===============================================================
+# Основне меню
+# ===============================================================
 async def start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = WELCOME_TEXT
     markup = menu_manager.build_markup(menu_manager.menu, [])
@@ -87,7 +212,6 @@ async def start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif update.callback_query:
         await update.callback_query.message.edit_text(text, reply_markup=markup)
 
-# Helper: safely delete stored image message (if any)
 async def _delete_prev_image(context: ContextTypes.DEFAULT_TYPE):
     img_id = context.user_data.get("image_message_id")
     chat_id = context.user_data.get("image_chat_id")
@@ -99,30 +223,69 @@ async def _delete_prev_image(context: ContextTypes.DEFAULT_TYPE):
         context.user_data.pop("image_message_id", None)
         context.user_data.pop("image_chat_id", None)
 
-# Main callback handler
+
+#=========================
+async def safe_edit_text(message, text, reply_markup=None, parse_mode=None):
+    """Безпечне редагування тексту — уникає помилки 'Message is not modified'."""
+    # Якщо текст той самий — додаємо невидимий символ, щоб Telegram прийняв оновлення
+    if message.text == text:
+        text += "\u2063"  # невидимий символ
+    try:
+        await message.edit_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
+    except Exception as e:
+        if "Message is not modified" not in str(e):
+            raise
+
+#=========================
+
+
+#========================
+
+#========================
+
+
+
+
+
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     data = query.data or ""
     if not data.startswith(CB_PREFIX):
-        # ignore unrelated callbacks
         return
-
-    # compute path list
     path_raw = data[len(CB_PREFIX):].lstrip("/")
     path = path_raw.split("/") if path_raw else []
-
     node = menu_manager.get_node_by_path(path)
+
+    # 🔹 Резервний пошук по ключу, якщо вузол не знайдено за шляхом
+    if node is None and path:
+        node = menu_manager.find_node_by_key(path[-1])
+
     if node is None:
         await query.message.edit_text("Пункт не знайдено.")
         return
 
     node_key = node.get("key")
+    # Якщо це профорієнтаційний тест — запускаємо його
+    if node_key == "career_test":
+        await start_career_test(update, context)
+        return
+
     content = menu_manager.info.get(node_key) if node_key else None
     markup = menu_manager.build_markup(node, path)
+    await _delete_prev_image(context)
+#=============================
+
+
+#=============================
+
 
     # If there was a previously shown image, delete it now (we will show new image if needed)
-    await _delete_prev_image(context)
+    # Якщо ключ є в info і там словник контактів
+
+
+
+
     # 🔹 Якщо обрано пункт "contacts", показуємо всі контакти
     if node_key == "contacts":
         contacts = menu_manager.info.get("contacts", {})
@@ -133,7 +296,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt += f"✉️ Email: {contacts.get('email')}\n"
         if contacts.get("consultant_username"):
             txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        await query.message.edit_text(txt, reply_markup=markup)
+        await safe_edit_text(query.message, txt, reply_markup=markup)
         return
         # 🔹 Якщо обрано пункт "contacts", показуємо всі контакти
     if node_key == "sport_contacts":
@@ -147,8 +310,78 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
         if contacts.get("schedule"):
             txt += f"💬 Графік: {contacts.get('schedule')}\n"        
+        await safe_edit_text(query.message, txt, reply_markup=markup)
+        return
 
-        await query.message.edit_text(txt, reply_markup=markup)
+    if node_key == "history_contacts":
+        contacts = menu_manager.info.get("history_contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        if contacts.get("schedule"):
+            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
+
+        await safe_edit_text(query.message, txt, reply_markup=markup)
+        return
+    if node_key == "psychology_contacts":
+        contacts = menu_manager.info.get("psychology_contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        if contacts.get("schedule"):
+            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
+
+        await safe_edit_text(query.message, txt, reply_markup=markup)
+        return
+    if node_key == "preschool_contacts":
+        contacts = menu_manager.info.get("preschool_contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        if contacts.get("schedule"):
+            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
+
+        await safe_edit_text(query.message, txt, reply_markup=markup)
+        return
+    if node_key == "teh_contacts":
+        contacts = menu_manager.info.get("teh_contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        if contacts.get("schedule"):
+            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
+
+        await safe_edit_text(query.message, txt, reply_markup=markup)
+        return
+    if node_key == "maths_contacts":
+        contacts = menu_manager.info.get("maths_contacts", {})
+        txt = "Контакти:\n"
+        if contacts.get("phone"):
+            txt += f"📞 Телефон: {contacts.get('phone')}\n"
+        if contacts.get("email"):
+            txt += f"✉️ Email: {contacts.get('email')}\n"
+        if contacts.get("consultant_username"):
+            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
+        if contacts.get("schedule"):
+            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
+
+        await safe_edit_text(query.message, txt, reply_markup=markup)
         return
     # Special: consult -> show contact inline
     if node_key == "consult":
@@ -162,7 +395,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             txt += f"Телефон: {contacts.get('phone')}\n"
         if contacts.get("email"):
             txt += f"Email: {contacts.get('email')}\n"
-        await query.message.edit_text(txt, reply_markup=markup)
+        await safe_edit_text(query.message, txt, reply_markup=markup)
         return
 
     # Special: faq
@@ -201,7 +434,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 info_text = node_info.get("text")
                 image = node_info.get("image")
         label = info_text or node.get("text") or node.get("title") or "Оберіть пункт:"
-         # ⬇️ якщо є image — показати її
+       # ⬇️ якщо є image — показати її
         if image:
             msg_photo = await query.message.reply_photo(photo=image)
             context.user_data["image_message_id"] = msg_photo.message_id
@@ -212,9 +445,22 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Leaf node (no children)
     # If content is dict -> may have image/images and text
     if isinstance(content, dict):
-        text = content.get("text", "") or node.get("text") or "Інформація відсутня."
+        title = content.get("title") or node.get("title") or node.get("text") or "Інформація відсутня."
+        description = content.get("description") or content.get("text") or ""
+        text = f"*{title}*\n\n{description}" if description else f"*{title}*"
         image = content.get("image")
         images = content.get("images")
+        buttons_data = content.get("buttons", [])
+        kb = []
+        for b in buttons_data:
+            if b.get("url"):
+                kb.append([InlineKeyboardButton(b["text"], url=b["url"])])
+            elif b.get("key"):
+                cb = CB_PREFIX + "/" + b["key"]
+                kb.append([InlineKeyboardButton(b["text"], callback_data=cb)])
+    
+        markup = InlineKeyboardMarkup(kb) if kb else menu_manager.build_markup(node, path)
+        await query.message.edit_text(text, reply_markup=markup)
 
         # If there is image(s) -> send photo(s) first (top), then edit text message to show text+buttons
         if image:
@@ -242,7 +488,8 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         # dict without image -> just edit text
-        await query.message.edit_text(text, reply_markup=markup)
+        await safe_edit_text(query.message, text, reply_markup=markup)
+
         return
 
     # If content is a string -> simple edit
@@ -254,4 +501,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.message.edit_text(node.get("text") or "Інформація недоступна.", reply_markup=markup)
 
 def register_handlers(application):
+   
+    application.add_handler(CommandHandler("career_test", start_career_test))
+    application.add_handler(CallbackQueryHandler(handle_career_answer, pattern="^career_ans:"))
     application.add_handler(CallbackQueryHandler(menu_callback, pattern=f'^{CB_PREFIX}'))
