@@ -45,55 +45,106 @@ class MenuManager:
             items = node.get("children", []) or node.get("items", [])
         return node
 
-    def build_markup(self, node: dict, path: list, row_size: int = 3):  
-        #==================================
-        #Головне меню: кастомна розкладка по рядках
-        #    - Підменю: row_size кнопок в рядок
-        #   - Кнопки "Назад" і "Головне меню" завжди в останньому рядку
-        #================================= 
+    def build_markup(self, node: dict, path: list, row_size: int = 3):
+
+    # ===============================
+    # Визначаємо список дочірніх елементів
+    # ===============================
+        child_list = (
+            node.get("buttons") or 
+            node.get("items") or 
+            node.get("children") or 
+            []
+        )
+
+        is_main_menu = not path
+        custom_layout = node.get("layout")
+
         kb = []
-        child_list = node.get("items") or node.get("children") or []
-        is_main_menu = not path 
         buttons = []
+
+    # ===============================
+    # Генеруємо кнопки
+    # ===============================
         for it in child_list:
             key = it.get("key")
             text = it.get("text", key)
-            url_value = self.info.get(key)
-            if isinstance(url_value, str) and url_value.startswith(("http://", "https://")):
-                buttons.append(InlineKeyboardButton(text, url=url_value))
-                continue
-            cb = CB_PREFIX + "/".join(path + [key])
-            buttons.append(InlineKeyboardButton(text, callback_data=cb))
 
-   # --- Розкладаємо кнопки ---
+        # --- 1. Якщо кнопка містить прямий URL у JSON
+            if "url" in it:
+                buttons.append(InlineKeyboardButton(text, url=it["url"]))
+                continue
+
+        # --- 2. Якщо кнопка використовує key → дивимось у info.json
+            if key:
+                info_value = self.info.get(key)
+
+            # Якщо в info.json URL → робимо URL кнопку
+                if isinstance(info_value, str) and info_value.startswith(("http://", "https://")):
+                    buttons.append(InlineKeyboardButton(text, url=info_value))
+                    continue
+
+            # Інакше — callback
+                cb = CB_PREFIX + "/".join(path + [key])
+                buttons.append(InlineKeyboardButton(text, callback_data=cb))
+                continue
+
+    # ===========================================================
+    #                 РОЗКЛАДКА ГОЛОВНОГО МЕНЮ
+    # ===========================================================
         if is_main_menu:
-        # Кількість кнопок на рядках для головного меню
-            main_menu_layout = [1, 2, 3, 3, 3, 1, 1, 2, 2, 1]  # приклад для 10 рядків
+            main_menu_layout = [1, 2, 3, 3, 3, 1, 1, 2, 2, 1]
+
             i = 0
             for row_count in main_menu_layout:
                 if i >= len(buttons):
                     break
-                kb.append(buttons[i:i+row_count])
+                kb.append(buttons[i:i + row_count])
                 i += row_count
-        # Якщо залишились кнопки, розбиваємо по row_size
-            while i < len(buttons):
-                kb.append(buttons[i:i+row_size])
-                i += row_size
-        else:
-        # Підменю – стандартно по row_size
-            for i in range(0, len(buttons), row_size):
-                kb.append(buttons[i:i+row_size])
 
-    # Кнопки "Назад" і "Головне меню" в окремий рядок, завжди поруч
+        # якщо залишились кнопки
+            while i < len(buttons):
+                kb.append(buttons[i:i + row_size])
+                i += row_size
+
+    # ===========================================================
+    #              КАСТОМНИЙ LAYOUT ДЛЯ ПІДМЕНЮ
+    # ===========================================================
+        elif custom_layout:
+            i = 0
+            for count in custom_layout:
+                if i >= len(buttons):
+                    break
+                kb.append(buttons[i:i + count])
+                i += count
+
+        # добивка
+            while i < len(buttons):
+                kb.append(buttons[i:i + row_size])
+                i += row_size
+
+    # ===========================================================
+    #                   СТАНДАРТНИЙ LAYOUT
+    # ===========================================================
+        else:
+            for i in range(0, len(buttons), row_size):
+                kb.append(buttons[i:i + row_size])
+
+    # ===========================================================
+    #      Кнопки НАЗАД і ГОЛОВНЕ МЕНЮ — завжди поруч
+    # ===========================================================
         if path:
             back_cb = CB_PREFIX + "/".join(path[:-1]) if len(path) > 1 else CB_PREFIX
             home_cb = CB_PREFIX
+
             kb.append([
                 InlineKeyboardButton("⬅️ Назад", callback_data=back_cb),
                 InlineKeyboardButton("🏠 Головне меню", callback_data=home_cb)
-        ])
+            ])
 
         return InlineKeyboardMarkup(kb)
+
+    
     def find_node_by_key(self, key: str, node=None):
         if node is None:
             node = self.menu
@@ -243,8 +294,42 @@ async def safe_edit_text(message, text, reply_markup=None, parse_mode=None):
 
 #========================
 
+# ===== menu_helpers.py =====
 
 
+CONTACT_FIELDS = ["phone", "email", "consultant_username", "schedule"]
+
+async def try_show_contacts(node_key, query, markup, info):
+    """
+    Перевіряє, чи в info[node_key] є контакти, і показує їх.
+    Повертає True, якщо контакти показано, False — інакше.
+    """
+    contacts = info.get(node_key)
+    if isinstance(contacts, dict) and any(field in contacts for field in CONTACT_FIELDS):
+        txt = "Контакти:\n"
+        for field, emoji, label in [
+            ("phone", "📞", "Телефон"),
+            ("email", "✉️", "Email"),
+            ("consultant_username", "💬", "Консультант"),
+            ("schedule", "🗓️", "Графік")
+        ]:
+            if value := contacts.get(field):
+                txt += f"{emoji} {label}: {value}\n"
+        await safe_edit_text(query.message, txt, reply_markup=markup)
+        return True
+    return False
+
+async def _delete_prev_image(context: ContextTypes.DEFAULT_TYPE):
+    msg_id = context.user_data.get("image_message_id")
+    chat_id = context.user_data.get("image_chat_id")
+    if msg_id and chat_id:
+        try:
+            await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+        except Exception:
+            pass  # якщо повідомлення вже видалено або немає доступу
+        finally:
+            context.user_data["image_message_id"] = None
+            context.user_data["image_chat_id"] = None
 
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -253,152 +338,45 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data or ""
     if not data.startswith(CB_PREFIX):
         return
+
     path_raw = data[len(CB_PREFIX):].lstrip("/")
     path = path_raw.split("/") if path_raw else []
+
     node = menu_manager.get_node_by_path(path)
 
-    # 🔹 Резервний пошук по ключу, якщо вузол не знайдено за шляхом
+    # Резервний пошук по ключу в меню
     if node is None and path:
         node = menu_manager.find_node_by_key(path[-1])
 
-    if node is None:
-        await query.message.edit_text("Пункт не знайдено.")
-        return
+    node_key = path[-1] if path else (node.get("key") if node else None)
+    markup = menu_manager.build_markup(node or {}, path)
 
-    node_key = node.get("key")
-    # Якщо це профорієнтаційний тест — запускаємо його
+    # видаляємо попередню картинку
+    await _delete_prev_image(context)
+
+# потім показуємо нову картинку, якщо є
+    if image:
+        msg_photo = await query.message.reply_photo(photo=image)
+        context.user_data["image_message_id"] = msg_photo.message_id
+        context.user_data["image_chat_id"] = msg_photo.chat_id
+
+
+    # 🔹 Якщо ключ є в info і там словник контактів
+    if node_key and node_key in menu_manager.info:
+        if await try_show_contacts(node_key, query, markup, menu_manager.info):
+            return
+
+    # Спеціальні випадки
     if node_key == "career_test":
         await start_career_test(update, context)
         return
 
-    content = menu_manager.info.get(node_key) if node_key else None
-    markup = menu_manager.build_markup(node, path)
-    await _delete_prev_image(context)
-#=============================
-
-
-#=============================
-
-
-    # If there was a previously shown image, delete it now (we will show new image if needed)
-    # Якщо ключ є в info і там словник контактів
-
-
-
-
-    # 🔹 Якщо обрано пункт "contacts", показуємо всі контакти
-    if node_key == "contacts":
-        contacts = menu_manager.info.get("contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-        # 🔹 Якщо обрано пункт "contacts", показуємо всі контакти
-    if node_key == "sport_contacts":
-        contacts = menu_manager.info.get("sport_contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        if contacts.get("schedule"):
-            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-
-    if node_key == "history_contacts":
-        contacts = menu_manager.info.get("history_contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        if contacts.get("schedule"):
-            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
-
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-    if node_key == "psychology_contacts":
-        contacts = menu_manager.info.get("psychology_contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        if contacts.get("schedule"):
-            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
-
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-    if node_key == "preschool_contacts":
-        contacts = menu_manager.info.get("preschool_contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        if contacts.get("schedule"):
-            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
-
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-    if node_key == "teh_contacts":
-        contacts = menu_manager.info.get("teh_contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        if contacts.get("schedule"):
-            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
-
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-    if node_key == "maths_contacts":
-        contacts = menu_manager.info.get("maths_contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"📞 Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"✉️ Email: {contacts.get('email')}\n"
-        if contacts.get("consultant_username"):
-            txt += f"💬 Консультант: {contacts.get('consultant_username')}\n"
-        if contacts.get("schedule"):
-            txt += f"💬 Графік: {contacts.get('schedule')}\n"        
-
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
-    # Special: consult -> show contact inline
     if node_key == "consult":
         consult = menu_manager.info.get("contacts", {}).get("consultant_username")
         if consult:
             await query.message.edit_text(f"Зв'язатися з консультантом: {consult}", reply_markup=markup)
             return
-        contacts = menu_manager.info.get("contacts", {})
-        txt = "Контакти:\n"
-        if contacts.get("phone"):
-            txt += f"Телефон: {contacts.get('phone')}\n"
-        if contacts.get("email"):
-            txt += f"Email: {contacts.get('email')}\n"
-        await safe_edit_text(query.message, txt, reply_markup=markup)
-        return
 
-    # Special: faq
     if node_key == "faq":
         faqs = menu_manager.info.get("faq", [])
         if not faqs:
@@ -408,33 +386,27 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.edit_text(text, reply_markup=markup)
         return
 
-    # Special: news (top 3)
     if node_key == "news":
         news = menu_manager.info.get("news", [])
         if not news:
             await query.message.edit_text("Новин немає.", reply_markup=markup)
             return
-        lines = []
-        for n in news[:3]:
-            lines.append(f"{n.get('date')} — {n.get('title')}\n{n.get('text')}")
+        lines = [f"{n.get('date')} — {n.get('title')}\n{n.get('text')}" for n in news[:3]]
         await query.message.edit_text("\n\n".join(lines), reply_markup=markup)
         return
 
-    # If node has children -> show submenu (use info text if available)
-    children = node.get("children") or node.get("items")
+    # Підменю
+    children = node.get("children") or node.get("items") if node else None
     if children:
-        # if info for this node is a string, show it; if dict with text, use it
+        node_info = menu_manager.info.get(node_key) if node_key else None
         info_text = None
         image = None
-        if node_key:
-            node_info = menu_manager.info.get(node_key)
-            if isinstance(node_info, str):
-                info_text = node_info
-            elif isinstance(node_info, dict):
-                info_text = node_info.get("text")
-                image = node_info.get("image")
+        if isinstance(node_info, str):
+            info_text = node_info
+        elif isinstance(node_info, dict):
+            info_text = node_info.get("text")
+            image = node_info.get("image")
         label = info_text or node.get("text") or node.get("title") or "Оберіть пункт:"
-       # ⬇️ якщо є image — показати її
         if image:
             msg_photo = await query.message.reply_photo(photo=image)
             context.user_data["image_message_id"] = msg_photo.message_id
@@ -442,8 +414,8 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.edit_text(label, reply_markup=markup)
         return
 
-    # Leaf node (no children)
-    # If content is dict -> may have image/images and text
+    # Leaf node
+    content = menu_manager.info.get(node_key) if node_key else None
     if isinstance(content, dict):
         title = content.get("title") or node.get("title") or node.get("text") or "Інформація відсутня."
         description = content.get("description") or content.get("text") or ""
@@ -458,22 +430,13 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             elif b.get("key"):
                 cb = CB_PREFIX + "/" + b["key"]
                 kb.append([InlineKeyboardButton(b["text"], callback_data=cb)])
-    
-        markup = InlineKeyboardMarkup(kb) if kb else menu_manager.build_markup(node, path)
-        await query.message.edit_text(text, reply_markup=markup)
+        markup = InlineKeyboardMarkup(kb) if kb else markup
 
-        # If there is image(s) -> send photo(s) first (top), then edit text message to show text+buttons
         if image:
-            # send photo (top)
             msg_photo = await query.message.reply_photo(photo=image)
-            # store photo id to delete later
             context.user_data["image_message_id"] = msg_photo.message_id
             context.user_data["image_chat_id"] = msg_photo.chat_id
-            # edit the current message (the inline) to the text under the photo
-            await query.message.edit_text(text, reply_markup=markup)
-            return
-        if images:
-            # send images; store first image id
+        elif images:
             first_id = None
             first_chat = None
             for i, img in enumerate(images):
@@ -484,21 +447,16 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if first_id:
                 context.user_data["image_message_id"] = first_id
                 context.user_data["image_chat_id"] = first_chat
-            await query.message.edit_text(text, reply_markup=markup)
-            return
 
-        # dict without image -> just edit text
         await safe_edit_text(query.message, text, reply_markup=markup)
-
         return
 
-    # If content is a string -> simple edit
     if isinstance(content, str):
-        await query.message.edit_text(content or "Інформація відсутна.", reply_markup=markup)
+        await query.message.edit_text(content or "Інформація відсутня.", reply_markup=markup)
         return
 
     # fallback
-    await query.message.edit_text(node.get("text") or "Інформація недоступна.", reply_markup=markup)
+    await query.message.edit_text("Інформація недоступна.", reply_markup=markup)
 
 def register_handlers(application):
    
