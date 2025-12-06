@@ -353,7 +353,13 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # видаляємо попередню картинку
     await _delete_prev_image(context)
+    # беремо інфо вузла
+    node_key = path[-1] if path else None
+    node_info = menu_manager.info.get(node_key) if node_key else None
 
+    image = None
+    if isinstance(node_info, dict):
+        image = node_info.get("image")
 # потім показуємо нову картинку, якщо є
     if image:
         msg_photo = await query.message.reply_photo(photo=image)
