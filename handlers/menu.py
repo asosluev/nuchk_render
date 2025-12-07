@@ -93,7 +93,7 @@ class MenuManager:
     #                 РОЗКЛАДКА ГОЛОВНОГО МЕНЮ
     # ===========================================================
         if is_main_menu:
-            main_menu_layout = [1, 2, 2,2,,1,3]
+            main_menu_layout = [1, 2, 2, 1, 3]
 
             i = 0
             for row_count in main_menu_layout:
