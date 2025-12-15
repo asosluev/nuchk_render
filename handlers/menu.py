@@ -263,29 +263,14 @@ async def start_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif update.callback_query:
         await update.callback_query.message.edit_text(text, reply_markup=markup)
 
-async def _delete_prev_image(context: ContextTypes.DEFAULT_TYPE):
-    img_id = context.user_data.get("image_message_id")
-    chat_id = context.user_data.get("image_chat_id")
-    if img_id and chat_id:
-        try:
-            await context.bot.delete_message(chat_id=chat_id, message_id=img_id)
-        except Exception:
-            pass
-        context.user_data.pop("image_message_id", None)
-        context.user_data.pop("image_chat_id", None)
+
 
 
 #=========================
 async def safe_edit_text(message, text, reply_markup=None, parse_mode=None):
-    """Безпечне редагування тексту — уникає помилки 'Message is not modified'."""
-    # Якщо текст той самий — додаємо невидимий символ, щоб Telegram прийняв оновлення
     if message.text == text:
-        text += "\u2063"  # невидимий символ
-    try:
-        await message.edit_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
-    except Exception as e:
-        if "Message is not modified" not in str(e):
-            raise
+        text += "\u2063"
+    await message.edit_text(text, reply_markup=reply_markup, parse_mode=parse_mode)
 
 #=========================
 
@@ -357,15 +342,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     node_key = path[-1] if path else None
     node_info = menu_manager.info.get(node_key) if node_key else None
 
-    image = None
-    if isinstance(node_info, dict):
-        image = node_info.get("image")
-# потім показуємо нову картинку, якщо є
-    if image:
-        msg_photo = await query.message.reply_photo(photo=image)
-        context.user_data["image_message_id"] = msg_photo.message_id
-        context.user_data["image_chat_id"] = msg_photo.chat_id
-
+  
 
     # 🔹 Якщо ключ є в info і там словник контактів
     if node_key and node_key in menu_manager.info:
@@ -460,6 +437,8 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if isinstance(content, str):
         await query.message.edit_text(content or "Інформація відсутня.", reply_markup=markup)
         return
+    # видаляємо попередню картинку
+
 
     # fallback
     await query.message.edit_text("Інформація недоступна.", reply_markup=markup)
