@@ -103,6 +103,40 @@
     "teh_instagram": "https://www.instagram.com/tf_nuchk?igshid=NmQ2ZmYxZjA%3D",
     "teh_facebook": "https://www.facebook.com/groups/440139689927181",
     "teh_site": "http://chnpu.edu.ua/faculties/technological-faculty",
+    "teh_kafedrs":"Оберіть кафедру ННІ професійної освіти та технологій:",
+    "teh_kafedrs_1":"Кафедра 1",
+    
+    
+    "teh_1_s_1":{
+        "text": "Кафедра 1 📐 ННІ професійної освіти та технологій",
+        "buttons": [
+            {
+                "text": "📘 Детальніше",
+                "url": "http://chnpu.edu.ua/lecterns/physical-lectern/287-department-of-pedagogy-psychology-and-methodology-of-physical-education"
+            },
+            {
+                "text": "📞 Контакти кафедри",
+                "key": "teh_contacts_"
+            }
+        ]
+    },
+    "teh_contacts_": {
+        "phone": "+380-98-643-59-32",
+        "email": "dekanat.phed.nuchk@gmail.com",
+        "consultant_username": "@unibot_manager",
+        "schedule": "Години роботи деканату: \n Понеділок – П’ятниця з 8-00 до 17-00 \n Субота – Неділя вихідні"
+    },
+    "teh_1_s_2":"2222222222222222222222",
+    "teh_1_s_3":"333333333333333333333333",
+    "teh_kafedrs_2":"Кафедра 2 📐 ННІ професійної освіти та технологій",
+    "teh_kafedrs_3":"Кафедра 3 📐 ННІ професійної освіти та технологій",
+    "teh_kafedrs_4":"Кафедра 4 📐 ННІ професійної освіти та технологій",
+
+
+
+
+
+
     "teh_contacts": {
         "phone": "(063)-523-39-54",
         "email": "chnpu@chnpu.edu.ua",
