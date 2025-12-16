@@ -226,7 +226,14 @@ async def send_next_question(update: Update, context: ContextTypes.DEFAULT_TYPE)
             return
         best_faculty = max(scores, key=scores.get)
         kb = [[InlineKeyboardButton("➡️ Перейти до факультету", callback_data=f"{CB_PREFIX}/specs/{best_faculty}")]]
-        faculty_name = menu_manager.info.get(best_faculty, {}).get("text", best_faculty)
+        faculty = menu_manager.info.get(best_faculty)
+
+        if isinstance(faculty, dict):
+            faculty_name = faculty.get("text", best_faculty)
+        else:
+            faculty_name = faculty or best_faculty
+
+                      
         await update.effective_message.reply_text(
             f"✅ Ви завершили тест!\n\nВам найбільше підходить: *{faculty_name}*",
             reply_markup=InlineKeyboardMarkup(kb),
