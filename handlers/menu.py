@@ -169,7 +169,7 @@ career_questions = [
             "Фізична активність, спорт": "sport_faculty",
             "Історія, культура, суспільство": "history_faculty",
             "Психологія, допомога людям": "psychology_faculty",
-            "Мистецтво, малювання, діти": "preschool_education_faculty"
+            "Мистецтво, малювання, діти": "preschool_faculty"
         }
     },
     {
@@ -189,14 +189,14 @@ career_questions = [
             "Психологія / Громадянська освіта": "psychology_faculty",
             "Мова і література": "philology_faculty",
             "Трудове навчання": "teh_faculty",
-            "Малювання / Музика": "preschool_education_faculty"
+            "Малювання / Музика": "preschool_faculty"
         }
     },
     {
         "q": "4️⃣ Що для вас найважливіше в роботі?",
         "options": {
             "Рух і динаміка": "sport_faculty",
-            "Креатив і самовираження": "preschool_education_faculty",
+            "Креатив і самовираження": "preschool_faculty",
             "Спілкування й допомога людям": "psychology_faculty",
             "Логіка, технології": "teh_faculty"
         }
@@ -206,7 +206,7 @@ career_questions = [
         "options": {
             "Активно, на свіжому повітрі": "sport_faculty",
             "Читаючи або пишучи": "philology_faculty",
-            "Малюючи, співаючи, створюючи щось": "preschool_education_faculty",
+            "Малюючи, співаючи, створюючи щось": "preschool_faculty",
             "Розмовляючи з друзями": "psychology_faculty"
         }
     }
